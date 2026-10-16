@@ -54,6 +54,11 @@ var _fov_lbl_t := 0.0
 var demo: DemoWorld
 var scene_btn: Button
 var _demo_on := false
+var top_box: VBoxContainer
+var side_box: GridContainer
+var _insets := Vector4(-1, -1, -1, -1) # 舞台座標的安全區：上、右、下、左
+## 商店截圖模式（只有啟動時帶 SHOTPILOT_SHOTS=1 環境變數才會開）
+var _shots := false
 
 
 func _ready() -> void:
@@ -73,6 +78,11 @@ func _ready() -> void:
 		if _demo_on:
 			_on_state(st))
 	_set_demo(true)
+	if OS.get_environment("SHOTPILOT_SHOTS") == "1":
+		_shots = true
+		ip_edit.text = ""
+		_run_shots.call_deferred()
+		return
 	udp.bind(BEACON_PORT)
 	if ip_edit.text != "":
 		_connect()
@@ -93,7 +103,7 @@ func _process(delta: float) -> void:
 	# 沒有陀螺儀（模擬器）時示範模式仍用固定朝向，搖桿照樣可以操作
 	if fusion.initialized or _demo_on:
 		# 橫拿時鏡頭座標＝手機座標繞螢幕法線轉 ∓90°（鏡頭的「上」改成手機的側邊）
-		var base := fusion.basis if fusion.initialized else Basis.IDENTITY
+		var base := fusion.basis if fusion.initialized and not _shots else Basis.IDENTITY
 		var q := Quaternion(base * Basis(Vector3.BACK, -hold_dir * PI * 0.5))
 		var a := fusion.linear_world if fusion.initialized else Vector3.ZERO
 		var vs := stage.size
@@ -248,7 +258,7 @@ func _on_state(d: Dictionary) -> void:
 		if _touches.size() < 2:
 			cur_fov = float(d.get("fov", cur_fov))
 		var playing := bool(d.get("playing", false))
-		play_btn.text = "■ 停止回放" if playing else "▶ 回放"
+		play_btn.text = "■ 停止回放" if playing else "回放"
 		wp_btn.text = "記點 (%d)" % waypoint_count
 
 
@@ -300,6 +310,9 @@ func _resize_demo() -> void:
 # ---------------------------------------------------------------- 手持方向
 
 func _update_hold_dir() -> void:
+	if _shots:
+		hold_dir = 0
+		return
 	match orient_opt.selected:
 		1: hold_dir = 0
 		2: hold_dir = 1
@@ -322,6 +335,7 @@ func _update_hold_dir() -> void:
 
 func _layout_stage() -> void:
 	var vs := get_viewport_rect().size
+	_apply_safe_area(vs)
 	match hold_dir:
 		0:
 			stage.rotation = 0.0
@@ -335,6 +349,34 @@ func _layout_stage() -> void:
 			stage.rotation = -PI * 0.5
 			stage.position = Vector2(0.0, vs.y)
 			stage.size = Vector2(vs.y, vs.x)
+
+
+## 瀏海／動態島／Home 指示條：UI 往內縮，避免被蓋住（橫拿時舞台旋轉，安全區跟著換邊）
+func _apply_safe_area(vs: Vector2) -> void:
+	var ws := Vector2(DisplayServer.window_get_size())
+	if ws.x <= 0.0:
+		return
+	var sa := DisplayServer.get_display_safe_area()
+	var k := vs.x / ws.x
+	var t := sa.position.y * k
+	var l := sa.position.x * k
+	var b := maxf(ws.y - sa.end.y, 0.0) * k
+	var r := maxf(ws.x - sa.end.x, 0.0) * k
+	var ins: Vector4
+	match hold_dir:
+		1: ins = Vector4(r, b, l, t)
+		-1: ins = Vector4(l, t, r, b)
+		_: ins = Vector4(t, r, b, l)
+	if ins == _insets:
+		return
+	_insets = ins
+	top_box.offset_top = 12 + ins.x
+	top_box.offset_left = 12 + ins.w
+	top_box.offset_right = -12 - ins.y
+	_anchor(side_box, 1, 0, 16 + ins.y, 160 + ins.x, 290, 330)
+	_anchor(move_joy, 0, 1, 30 + ins.w, 30 + ins.z, 230, 230)
+	_anchor(lift_joy, 0, 1, 280 + ins.w, 30 + ins.z, 70, 230)
+	_anchor(look_joy, 1, 1, 30 + ins.y, 30 + ins.z, 230, 230)
 
 
 # ---------------------------------------------------------------- UI
@@ -362,6 +404,7 @@ func _build_ui() -> void:
 
 	# 上方：連線列 + 設定列
 	var top := VBoxContainer.new()
+	top_box = top
 	top.set_anchors_and_offsets_preset(PRESET_TOP_WIDE)
 	top.offset_left = 12
 	top.offset_right = -12
@@ -397,6 +440,7 @@ func _build_ui() -> void:
 
 	# 右上：操作按鈕（2 欄）
 	var side := GridContainer.new()
+	side_box = side
 	side.columns = 2
 	side.add_theme_constant_override("h_separation", 10)
 	side.add_theme_constant_override("v_separation", 10)
@@ -405,7 +449,8 @@ func _build_ui() -> void:
 	rec_btn = _side_button(side, "● 錄製", func(): _send_cmd("rec"))
 	wp_btn = _side_button(side, "記點 (0)", func(): _send_cmd("waypoint"))
 	_side_button(side, "自動運鏡", func(): _send_cmd("auto"))
-	play_btn = _side_button(side, "▶ 回放", func(): _send_cmd("play"))
+	play_btn = _side_button(side, "回放",  # 粉圓字型沒有 ▶，iOS 不會補字
+		 func(): _send_cmd("play"))
 	_side_button(side, "清除點", func(): _send_cmd("clear_wp"))
 	_side_button(side, "歸零", func(): _send_cmd("recenter"))
 	scene_btn = _side_button(side, "換場景", func():
@@ -466,3 +511,74 @@ func _anchor(c: Control, ax: float, ay: float, x: float, y: float, w: float, h: 
 	c.offset_top = y if ay != 1 else -y - h
 	c.offset_right = c.offset_left + w
 	c.offset_bottom = c.offset_top + h
+
+
+# ---------------------------------------------------------------- 商店截圖
+
+## 依序擺好幾個示範畫面並存成 user://shots/*.png（iOS 上是 App 的 Documents），用 devicectl 取回
+func _run_shots() -> void:
+	DirAccess.make_dir_recursive_absolute("user://shots")
+	await _shot_scene("街道巷口", 55.0, 0.4)
+	await _save("01_street")
+
+	await _shot_scene("客廳", 58.0, 0.8)
+	_send_cmd("rec")
+	await _wait(3.2)
+	await _save("02_record")
+	_send_cmd("rec")
+
+	await _shot_scene("走廊", 30.0, 0.0)
+	cur_fov = 30.0
+	fov_lbl.text = "FOV %d°" % roundi(cur_fov)
+	fov_lbl.visible = true
+	_fov_lbl_t = 10.0
+	await _wait(0.3)
+	await _save("03_fov")
+	_fov_lbl_t = 0.0
+	fov_lbl.visible = false
+
+	await _shot_scene("舞台", 55.0, 0.3)
+	for i in 3:
+		_send_cmd("waypoint")
+		move_joy.value = Vector2(0.4, 0.15)
+		look_joy.value = Vector2(-0.25, 0)
+		await _wait(0.5)
+		move_joy.value = Vector2.ZERO
+		look_joy.value = Vector2.ZERO
+	_send_cmd("auto")
+	await _wait(0.4)
+	await _save("04_auto")
+	_send_cmd("play")
+
+	await _shot_scene("公園", 62.0, 1.0)
+	await _save("05_park")
+	var f := FileAccess.open("user://shots/done.txt", FileAccess.WRITE)
+	f.store_string("ok")
+	f.close()
+
+
+## back_sec：用左搖桿往後退幾秒，直式畫面比較看得到環境
+func _shot_scene(n: String, fov := 0.0, back_sec := 0.0) -> void:
+	demo.apply_scene(demo.SCENES.find(n))
+	if fov > 0.0:
+		cur_fov = fov
+		_send({"t": "fov", "v": fov})
+	info_lbl.text = "示範模式：%s（連上電腦後改用電腦的場景）" % n
+	# 範本機位的俯仰角：歸零後套回去（截圖模式沒有陀螺儀姿態）
+	var pitch := asin(clampf(-demo.cam.global_basis.z.y, -1.0, 1.0))
+	await _wait(0.3)
+	demo.rig._pitch_offset = pitch
+	if back_sec > 0.0:
+		move_joy.value = Vector2(0, -1)
+		await _wait(back_sec)
+		move_joy.value = Vector2.ZERO
+	await _wait(0.8)
+
+
+func _wait(sec: float) -> void:
+	await get_tree().create_timer(sec).timeout
+
+
+func _save(n: String) -> void:
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png("user://shots/%s.png" % n)

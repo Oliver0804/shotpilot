@@ -1,0 +1,54 @@
+{
+  "app": "ShotPilot",
+  "locale": "zh-Hant",
+  "out": "marketing-6.9",
+  "layout": "plain",
+  "device_top": 650,
+  "island": true,
+  "theme": {
+    "background": "radial-gradient(1400px 1100px at 50% 16%, #5a2a62 0%, #2a1638 55%, #150b1f 100%)",
+    "text": "#ffffff",
+    "subtext": "rgba(255,228,240,.78)",
+    "accent": "#ff8fc0",
+    "glow": "rgba(255,143,192,.25)",
+    "headline_size": 112,
+    "sub_size": 52
+  },
+  "slides": [
+    {
+      "name": "camera",
+      "persona": "AI 影片創作者：文字很難控制鏡頭位置與角度",
+      "screenshot": "raw/01_street.png",
+      "headline": "手機就是攝影機\n在 3D 場景裡**運鏡**",
+      "sub": "轉動手機＝轉鏡頭，蹲下鏡頭跟著變低"
+    },
+    {
+      "name": "record",
+      "persona": "分鏡／previs 創作者：想把一段運鏡完整留下來",
+      "screenshot": "raw/02_record.png",
+      "headline": "一鍵錄下\n**整段運鏡**",
+      "sub": "位置、角度、FOV 全部記錄，可回放"
+    },
+    {
+      "name": "fov",
+      "persona": "攝影愛好者：想試不同焦段的構圖",
+      "screenshot": "raw/03_fov.png",
+      "headline": "雙指縮放\n**換焦段**",
+      "sub": "10°～110° 視角，特寫遠景隨手切換"
+    },
+    {
+      "name": "auto",
+      "persona": "手不夠穩的人：想要平滑的推軌、環繞",
+      "screenshot": "raw/04_auto.png",
+      "headline": "記幾個機位\n**自動生成運鏡**",
+      "sub": "平滑曲線串起每個點，不必手穩"
+    },
+    {
+      "name": "scenes",
+      "persona": "想先試玩、或要自建場景的人",
+      "screenshot": "raw/05_park.png",
+      "headline": "內建範例場景\n**連電腦更強大**",
+      "sub": "搭配開源桌面版自建場景、匯出 AI 素材"
+    }
+  ]
+}

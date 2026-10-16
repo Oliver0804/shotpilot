@@ -1,0 +1,54 @@
+{
+  "app": "ShotPilot",
+  "locale": "en-US",
+  "out": "marketing-6.9-en",
+  "layout": "plain",
+  "device_top": 650,
+  "island": true,
+  "theme": {
+    "background": "radial-gradient(1400px 1100px at 50% 16%, #5a2a62 0%, #2a1638 55%, #150b1f 100%)",
+    "text": "#ffffff",
+    "subtext": "rgba(255,228,240,.78)",
+    "accent": "#ff8fc0",
+    "glow": "rgba(255,143,192,.25)",
+    "headline_size": 100,
+    "sub_size": 52
+  },
+  "slides": [
+    {
+      "name": "camera",
+      "persona": "AI 影片創作者：文字很難控制鏡頭位置與角度",
+      "screenshot": "raw/01_street.png",
+      "headline": "Your phone is\nthe **camera**",
+      "sub": "Turn to pan, crouch to go low — in 3D"
+    },
+    {
+      "name": "record",
+      "persona": "分鏡／previs 創作者：想把一段運鏡完整留下來",
+      "screenshot": "raw/02_record.png",
+      "headline": "Record a whole\n**camera move**",
+      "sub": "Position, angle and FOV, ready to replay"
+    },
+    {
+      "name": "fov",
+      "persona": "攝影愛好者：想試不同焦段的構圖",
+      "screenshot": "raw/03_fov.png",
+      "headline": "Pinch to\n**change lenses**",
+      "sub": "10°–110° field of view, wide to close-up"
+    },
+    {
+      "name": "auto",
+      "persona": "手不夠穩的人：想要平滑的推軌、環繞",
+      "screenshot": "raw/04_auto.png",
+      "headline": "Drop a few points,\nget a **smooth move**",
+      "sub": "Auto camera paths, no steady hands needed"
+    },
+    {
+      "name": "scenes",
+      "persona": "想先試玩、或要自建場景的人",
+      "screenshot": "raw/05_park.png",
+      "headline": "Built-in scenes,\n**more with a PC**",
+      "sub": "Pair with the open-source desktop app"
+    }
+  ]
+}
