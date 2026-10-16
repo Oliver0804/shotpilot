@@ -62,7 +62,7 @@ AI 圖像與影片模型很難只靠文字控制「鏡頭從哪個角度、怎�
 **Subtitle** (≤30): Virtual camera for AI video
 
 **Promotional text** (≤170):
-Turn your phone to pan, crouch to go low. Built-in scenes let you shoot, record and build smooth camera moves right away; pair with the desktop app to export material for AI video.
+Turn your phone to pan, crouch to go low. Shoot, record and build smooth camera moves in built-in scenes, or pair with the desktop app to export AI video material.
 
 **Keywords** (≤100):
 virtual camera,previs,camera move,storyboard,AI video,cinematography,3D,gyro,framing,depth map,shot
