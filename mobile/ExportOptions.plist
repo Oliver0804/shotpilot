@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- destination=upload：exportArchive 直接推到 App Store Connect，不另外用 altool / Transporter -->
+	<key>destination</key>
+	<string>upload</string>
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>teamID</key>
+	<string>A3VXSGZPQ2</string>
+	<key>signingStyle</key>
+	<string>automatic</string>
+	<!-- 一定要 false，否則 Apple 會自己把 build number +1，跟 export_presets.cfg 對不起來 -->
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+	<key>uploadSymbols</key>
+	<true/>
+	<key>testFlightInternalTestingOnly</key>
+	<false/>
+</dict>
+</plist>

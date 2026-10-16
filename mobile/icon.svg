@@ -1,8 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <rect width="1024" height="1024" fill="#14161a"/>
-  <rect x="180" y="330" width="500" height="364" rx="56" fill="#e8eaee"/>
-  <path d="M700 452 L860 360 V664 L700 572 Z" fill="#e8eaee"/>
-  <circle cx="430" cy="512" r="110" fill="#14161a"/>
-  <circle cx="430" cy="512" r="62" fill="#3ddc84"/>
-  <circle cx="610" cy="390" r="22" fill="#ff4d4d"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff9cc2"/>
+      <stop offset="0.55" stop-color="#e86aa6"/>
+      <stop offset="1" stop-color="#7b5cff"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.55">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fig" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a2560"/>
+      <stop offset="1" stop-color="#26173f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+  <!-- 地面格線（透視） -->
+  <g stroke="#ffffff" stroke-opacity="0.22" stroke-width="6" fill="none">
+    <path d="M140 790 H884"/>
+    <path d="M200 860 H824"/>
+    <path d="M512 700 L512 900"/>
+    <path d="M400 700 L300 900"/>
+    <path d="M624 700 L724 900"/>
+    <path d="M290 700 L90 900"/>
+    <path d="M734 700 L934 900"/>
+  </g>
+  <!-- 人偶 -->
+  <g fill="url(#fig)">
+    <circle cx="512" cy="372" r="62"/>
+    <rect x="456" y="446" width="112" height="190" rx="54"/>
+    <rect x="404" y="456" width="40" height="170" rx="20" transform="rotate(10 424 456)"/>
+    <rect x="580" y="456" width="40" height="170" rx="20" transform="rotate(-10 600 456)"/>
+    <rect x="462" y="618" width="44" height="170" rx="22"/>
+    <rect x="518" y="618" width="44" height="170" rx="22"/>
+  </g>
+  <ellipse cx="512" cy="800" rx="120" ry="20" fill="#26173f" fill-opacity="0.25"/>
+  <!-- 觀景窗 -->
+  <g stroke="#ffffff" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M196 330 V220 H306"/>
+    <path d="M718 220 H828 V330"/>
+    <path d="M828 694 V804 H718"/>
+    <path d="M306 804 H196 V694"/>
+  </g>
+  <circle cx="300" cy="320" r="30" fill="#ff3d6e" stroke="#ffffff" stroke-width="10"/>
 </svg>

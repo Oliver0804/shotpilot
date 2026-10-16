@@ -3,6 +3,7 @@ extends Control
 
 const Fusion := preload("res://sensor_fusion.gd")
 const Joystick := preload("res://joystick.gd")
+const DemoWorld := preload("res://demo_world.gd")
 const BEACON_PORT := 47011
 const DEFAULT_PORT := 8765
 const BUFFER_SIZE := 4 * 1024 * 1024
@@ -49,6 +50,10 @@ var _touches := {} # 不在搖桿/按鈕上的手指：index -> 位置（雙指�
 var _pinch_dist := 0.0
 var _pinch_fov := 0.0
 var _fov_lbl_t := 0.0
+## 沒連電腦時的示範模式：手機自己渲染範例場景
+var demo: DemoWorld
+var scene_btn: Button
+var _demo_on := false
 
 
 func _ready() -> void:
@@ -62,6 +67,12 @@ func _ready() -> void:
 	# 介面固定直式，不讓系統旋轉；橫拿由 App 依重力自行判斷（不受 iPhone 直向鎖定影響）
 	if OS.has_feature("mobile"):
 		DisplayServer.screen_set_orientation(DisplayServer.SCREEN_PORTRAIT)
+	demo = DemoWorld.new()
+	add_child(demo)
+	demo.state_updated.connect(func(st):
+		if _demo_on:
+			_on_state(st))
+	_set_demo(true)
 	udp.bind(BEACON_PORT)
 	if ip_edit.text != "":
 		_connect()
@@ -74,12 +85,19 @@ func _process(delta: float) -> void:
 	_poll_discovery()
 	_poll_ws(delta)
 
-	if ws.get_ready_state() == WebSocketPeer.STATE_OPEN and fusion.initialized:
+	var online := ws.get_ready_state() == WebSocketPeer.STATE_OPEN
+	if online == _demo_on:
+		_set_demo(not online)
+	if _demo_on:
+		_resize_demo()
+	# 沒有陀螺儀（模擬器）時示範模式仍用固定朝向，搖桿照樣可以操作
+	if fusion.initialized or _demo_on:
 		# 橫拿時鏡頭座標＝手機座標繞螢幕法線轉 ∓90°（鏡頭的「上」改成手機的側邊）
-		var q := Quaternion(fusion.basis * Basis(Vector3.BACK, -hold_dir * PI * 0.5))
-		var a := fusion.linear_world
+		var base := fusion.basis if fusion.initialized else Basis.IDENTITY
+		var q := Quaternion(base * Basis(Vector3.BACK, -hold_dir * PI * 0.5))
+		var a := fusion.linear_world if fusion.initialized else Vector3.ZERO
 		var vs := stage.size
-		ws.send_text(JSON.stringify({
+		_send({
 			"t": "pose",
 			"q": [q.x, q.y, q.z, q.w],
 			"a": [a.x, a.y, a.z],
@@ -89,7 +107,7 @@ func _process(delta: float) -> void:
 			"l": [look_joy.value.x, look_joy.value.y],
 			"f": frozen,
 			"aspect": vs.x / maxf(vs.y, 1.0),
-		}))
+		})
 
 	if _fov_lbl_t > 0.0:
 		_fov_lbl_t -= delta
@@ -102,7 +120,10 @@ func _process(delta: float) -> void:
 		_fps_t = 0.0
 		var sensor := "感測器 OK" if fusion.initialized else "沒有感測器"
 		var vs := stage.size
-		info_lbl.text = "%s｜%s｜串流 %.0f fps" % [sensor, "橫" if vs.x > vs.y else "直", _fps]
+		if _demo_on:
+			info_lbl.text = "示範模式：%s｜%s（連上電腦後改用電腦的場景）" % [demo.SCENES[demo.scene_index], sensor]
+		else:
+			info_lbl.text = "%s｜%s｜串流 %.0f fps" % [sensor, "橫" if vs.x > vs.y else "直", _fps]
 
 
 # ---------------------------------------------------------------- 雙指縮放 FOV
@@ -123,8 +144,7 @@ func _input(event: InputEvent) -> void:
 		if _touches.size() == 2 and _pinch_dist > 10.0:
 			# 張開＝拉近（FOV 變小），捏合＝拉遠
 			cur_fov = clampf(_pinch_fov * _pinch_dist / maxf(_pinch_distance(), 1.0), 10.0, 110.0)
-			if ws.get_ready_state() == WebSocketPeer.STATE_OPEN:
-				ws.send_text(JSON.stringify({"t": "fov", "v": cur_fov}))
+			_send({"t": "fov", "v": cur_fov})
 			fov_lbl.text = "FOV %d°" % roundi(cur_fov)
 			fov_lbl.visible = true
 			_fov_lbl_t = 1.2
@@ -213,6 +233,11 @@ func _on_text(text: String) -> void:
 	if not d is Dictionary:
 		return
 	if d.get("t") == "state":
+		_on_state(d)
+
+
+func _on_state(d: Dictionary) -> void:
+	if true:
 		recording = bool(d.get("rec", false))
 		rec_btn.text = "■ %.1fs" % float(d.get("rec_t", 0.0)) if recording else "● 錄製"
 		if recording:
@@ -240,8 +265,36 @@ func _on_frame(jpg: PackedByteArray) -> void:
 
 
 func _send_cmd(c: String) -> void:
-	if ws.get_ready_state() == WebSocketPeer.STATE_OPEN:
-		ws.send_text(JSON.stringify({"t": "cmd", "c": c}))
+	_send({"t": "cmd", "c": c})
+
+
+## 連上電腦就送過去，否則餵給示範模式（兩邊格式完全相同）
+func _send(d: Dictionary) -> void:
+	if _demo_on:
+		demo.feed(d)
+	elif ws.get_ready_state() == WebSocketPeer.STATE_OPEN:
+		ws.send_text(JSON.stringify(d))
+
+
+func _set_demo(on: bool) -> void:
+	_demo_on = on
+	demo.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
+	demo.process_mode = Node.PROCESS_MODE_INHERIT if on else Node.PROCESS_MODE_DISABLED
+	if scene_btn:
+		scene_btn.visible = on
+	if on:
+		view.texture = demo.get_texture()
+		info_lbl.text = "示範模式：%s（連上電腦後改用電腦的場景）" % demo.SCENES[demo.scene_index]
+	elif _stream_tex:
+		view.texture = _stream_tex
+
+
+## 示範畫面的解析度跟著螢幕實際像素與手持方向
+func _resize_demo() -> void:
+	var px := float(DisplayServer.window_get_size().x) / maxf(get_viewport_rect().size.x, 1.0)
+	var want := Vector2i((stage.size * px).round())
+	if want.x > 0 and want.y > 0 and demo.size != want:
+		demo.size = want
 
 
 # ---------------------------------------------------------------- 手持方向
@@ -355,6 +408,9 @@ func _build_ui() -> void:
 	play_btn = _side_button(side, "▶ 回放", func(): _send_cmd("play"))
 	_side_button(side, "清除點", func(): _send_cmd("clear_wp"))
 	_side_button(side, "歸零", func(): _send_cmd("recenter"))
+	scene_btn = _side_button(side, "換場景", func():
+		var n := demo.next_scene()
+		info_lbl.text = "示範模式：%s（連上電腦後改用電腦的場景）" % n)
 	hold_btn = _side_button(side, "暫停跟隨", Callable())
 	hold_btn.toggle_mode = true
 	hold_btn.toggled.connect(func(on): frozen = on)

@@ -77,8 +77,12 @@ signal take_recorded(anim_name: String)
 ## 手機送來的、rig 本身不處理的指令（例如 "waypoint"、"auto"），交給上層（Studio）處理
 signal command(name: String)
 
+## 每 0.1 秒的鏡頭狀態（跟送給手機的 state 訊息相同），本機模式靠它更新 UI
+signal state_updated(state: Dictionary)
 ## 額外附在 state 訊息裡回傳給手機的欄位（例如記錄點數量）
 var extra_state := {}
+## 本機模式：不開伺服器，姿態由 feed() 直接餵入（手機 App 的示範模式用）
+var local_mode := false
 
 var _server: Server
 var _has_pose := false
@@ -163,6 +167,11 @@ func get_addresses() -> PackedStringArray:
 
 func get_client_count() -> int:
 	return _server.client_count if _server else 0
+
+
+## 本機模式：直接餵入一則跟網路訊息相同格式的資料（pose／fov／cmd）
+func feed(d: Dictionary) -> void:
+	_on_message(0, d)
 
 
 func recenter() -> void:
@@ -281,9 +290,10 @@ func _integrate_accel(a_world: Vector3, dt: float) -> void:
 # ---------------------------------------------------------------- 每幀
 
 func _process(delta: float) -> void:
-	if _server == null:
+	if _server == null and not local_mode:
 		return
-	_server.poll(delta)
+	if _server:
+		_server.poll(delta)
 	if not is_instance_valid(target) or not target.is_inside_tree():
 		return
 
@@ -396,7 +406,9 @@ func _send_camera_state(delta: float) -> void:
 	if target is Camera3D:
 		state["fov"] = (target as Camera3D).fov
 	state.merge(extra_state)
-	_server.broadcast(state)
+	state_updated.emit(state)
+	if _server:
+		_server.broadcast(state)
 
 
 func _ensure_viewport() -> void:
