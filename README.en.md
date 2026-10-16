@@ -4,6 +4,10 @@
 
 Use your phone as a virtual camera, "shoot" inside a simple 3D scene, and export camera-motion material for AI video generation (RGB + depth video + camera trajectory).
 
+[![ShotPilot intro video](https://img.youtube.com/vi/MtYnDYLFxHk/maxresdefault.jpg)](https://youtu.be/MtYnDYLFxHk)
+
+▶ [Watch the intro video on YouTube](https://youtu.be/MtYnDYLFxHk)
+
 ## Example: block out the shot with colored shapes, let AI paint it
 
 Image and video models are hard to control with text alone — who stands where, and which angle the camera shoots from. ShotPilot lets you block out the scene with simple shapes first (each color stands for one thing), find the camera angle with your phone, then hand the screenshot (or the exported RGB / depth video) to the AI as a reference image, together with a prompt that explains the colors. Composition, placement, perspective and lighting direction all follow the scene.

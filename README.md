@@ -4,6 +4,10 @@
 
 用手機當虛擬攝影機，在簡易 3D 場景裡「假裝拍攝」，產出給 AI 影片生成用的運鏡素材（RGB＋深度影片＋鏡頭軌跡）。
 
+[![ShotPilot 介紹影片](https://img.youtube.com/vi/MtYnDYLFxHk/maxresdefault.jpg)](https://youtu.be/MtYnDYLFxHk)
+
+▶ [在 YouTube 觀看介紹影片](https://youtu.be/MtYnDYLFxHk)
+
 ## 範例：用色塊排好構圖，再交給 AI 畫
 
 AI 圖像／影片模型很難只靠文字控制「誰站哪裡、鏡頭從哪個角度拍」。ShotPilot 的做法是先用簡單形狀把場景排出來
