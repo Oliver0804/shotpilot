@@ -1,0 +1,95 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://addons/phone_camera_rig/phone_camera_rig.gd" id="1_rig"]
+[ext_resource type="Script" path="res://addons/phone_camera_rig/phone_cam_overview.gd" id="2_ov"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+tonemap_mode = 2
+ssao_enabled = true
+
+[sub_resource type="PlaneMesh" id="floor_mesh"]
+size = Vector2(20, 20)
+
+[sub_resource type="StandardMaterial3D" id="floor_mat"]
+albedo_color = Color(0.62, 0.6, 0.66, 1)
+
+[sub_resource type="CapsuleMesh" id="body_mesh"]
+radius = 0.3
+height = 1.7
+
+[sub_resource type="StandardMaterial3D" id="body_mat"]
+albedo_color = Color(0.12, 0.12, 0.13, 1)
+
+[sub_resource type="SphereMesh" id="ball_mesh"]
+radius = 0.45
+height = 0.9
+
+[sub_resource type="StandardMaterial3D" id="ball_mat"]
+albedo_color = Color(0.25, 0.4, 0.25, 1)
+
+[sub_resource type="CylinderMesh" id="cyl_mesh"]
+top_radius = 0.22
+bottom_radius = 0.22
+height = 0.8
+
+[sub_resource type="StandardMaterial3D" id="cyl_mat"]
+albedo_color = Color(0.9, 0.5, 0.15, 1)
+
+[sub_resource type="BoxMesh" id="box_mesh"]
+size = Vector3(0.6, 0.8, 0.6)
+
+[node name="Demo" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 5, 0)
+shadow_enabled = true
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+mesh = SubResource("floor_mesh")
+surface_material_override/0 = SubResource("floor_mat")
+
+[node name="Figure" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+mesh = SubResource("body_mesh")
+surface_material_override/0 = SubResource("body_mat")
+
+[node name="Ball" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.45, 0.2)
+mesh = SubResource("ball_mesh")
+surface_material_override/0 = SubResource("ball_mat")
+
+[node name="Cylinder" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 0.4, 0.6)
+mesh = SubResource("cyl_mesh")
+surface_material_override/0 = SubResource("cyl_mat")
+
+[node name="Box" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0.4, 0.3)
+mesh = SubResource("box_mesh")
+surface_material_override/0 = SubResource("body_mat")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.985, 0.174, 0, -0.174, 0.985, 0, 1.4, 3.5)
+fov = 55.0
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+
+[node name="PhoneCameraRig" type="Node" parent="." node_paths=PackedStringArray("target", "animation_player")]
+script = ExtResource("1_rig")
+target = NodePath("../Camera3D")
+animation_player = NodePath("../AnimationPlayer")
+
+[node name="Overview" type="Node3D" parent="." node_paths=PackedStringArray("rig")]
+script = ExtResource("2_ov")
+rig = NodePath("../PhoneCameraRig")
