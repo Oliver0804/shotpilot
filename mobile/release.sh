@@ -24,7 +24,7 @@ AUTH=(-authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER
 BUILD=$(git rev-list --count HEAD)
 sed -i '' -E "s/^application\/version=\".*\"/application\/version=\"$BUILD\"/" export_presets.cfg
 VERSION=$(sed -nE 's/^application\/short_version="(.*)"/\1/p' export_presets.cfg)
-echo "▶ 1/4 版本 $VERSION（build $BUILD）"
+echo "▶ 1/4 版本 ${VERSION}（build ${BUILD}）"
 
 # 2. Godot 匯出 Xcode 專案（共用腳本先同步，確保示範模式跟桌面端一致）
 echo "▶ 2/4 Godot 匯出"

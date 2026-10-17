@@ -10,7 +10,7 @@ TEAM=${IOS_TEAM_ID:-A3VXSGZPQ2}
 BUNDLE=${IOS_BUNDLE_ID:-net.bashcat.shotpilot}
 # App Store Connect API key：檔案內定義 ASC_KEY_ID、ASC_ISSUER_ID、ASC_KEY_PATH（.p8 路徑），不要放進 repo
 ASC_ENV=${ASC_ENV:-$HOME/.config/shotpilot/asc-api.env}
-[ -f "$ASC_ENV" ] || { echo "找不到 $ASC_ENV（需要 ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH）"; exit 1; }
+[ -f "$ASC_ENV" ] || { echo "找不到 ${ASC_ENV}（需要 ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_PATH）"; exit 1; }
 . "$ASC_ENV"
 
 DEVICE=${1:-$(xcrun devicectl list devices 2>/dev/null | awk '/iPhone/ && /physical/ && /available|connected/ {for(i=1;i<=NF;i++) if ($i ~ /^[0-9A-F]{8}-[0-9A-F]{16}$/) {print $i; exit}}')}
