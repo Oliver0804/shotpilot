@@ -14,6 +14,7 @@
 | App 隱私 | 不蒐集資料（Data Not Collected） |
 | 加密 | 不使用非豁免加密（Info.plist 已設 ITSAppUsesNonExemptEncryption=false） |
 | 版權 | 2026 Oliver |
+| ASC App ID | 6823960216 |
 
 ## 繁體中文（zh-Hant）
 
@@ -57,7 +58,7 @@ AI 圖像與影片模型很難只靠文字控制「鏡頭從哪個角度、怎�
 
 ## English (en-US)
 
-**Name**: ShotPilot
+**Name**: ShotPilot - Virtual Camera（「ShotPilot」在英文區已被其他開發者使用）
 
 **Subtitle** (≤30): Virtual camera for AI video
 
@@ -65,7 +66,7 @@ AI 圖像與影片模型很難只靠文字控制「鏡頭從哪個角度、怎�
 Turn your phone to pan, crouch to go low. Shoot, record and build smooth camera moves in built-in scenes, or pair with the desktop app to export AI video material.
 
 **Keywords** (≤100):
-virtual camera,previs,camera move,storyboard,AI video,cinematography,3D,gyro,framing,depth map,shot
+previs,camera move,storyboard,AI video,cinematography,3D,gyro,framing,depth map,shot,dolly,camera
 
 **Description**:
 ShotPilot turns your phone into a virtual camera inside a 3D scene.
