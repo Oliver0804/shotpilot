@@ -37,4 +37,4 @@ INSTALL_TEMPLATE=()
 "$GODOT" --headless --path . "${INSTALL_TEMPLATE[@]}" --export-release Android "$AAB" > "$OUT/godot-release.log" 2>&1 || true
 [ -f "$AAB" ] || { echo "❌ Godot 匯出失敗："; grep -E "ERROR|error:|FAILED" -A2 "$OUT/godot-release.log" | head -30; exit 1; }
 
-echo "✅ $AAB（$(du -h "$AAB" | cut -f1)）"
+echo "✅ ${AAB}（$(du -h "$AAB" | cut -f1)）"
